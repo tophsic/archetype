@@ -52,7 +52,11 @@
       <publicIndexFile filesystemName="index.php"/>
       <htaccessFile filesystemName=".htaccess"/>
     </publicDirectory>
-    <projectProvidersDirectory enabled="false"/>
+    <projectProvidersDirectory>
+      <projectProviderFile projectProviderName="propel" actionNames="enable,AddTable,AddColumn,AddDatabase"/>
+      <projectProviderFile projectProviderName="propel" actionNames="create-conf"/>
+      <projectProviderFile projectProviderName="propel" actionNames="Enable,Database,Table,Column,Validator,ForeignKey,EditProperty,ShowProperty"/>
+    </projectProvidersDirectory>
     <temporaryDirectory enabled="false"/>
     <testsDirectory>
       <testPHPUnitConfigFile filesystemName="phpunit.xml"/>
