@@ -1,27 +1,24 @@
 <?php
 
-require_once 'Zend/Tool/Project/Provider/Abstract.php';
+require_once 'Xtoph/Tool/Project/Provider/Abstract.php';
 require_once 'Zend/Tool/Project/Provider/Exception.php';
 
 class PropelProvider
-    extends Zend_Tool_Project_Provider_Abstract
+    extends Xtoph_Tool_Project_Provider_Abstract
 {
 
-   public function _createPropelResource(Zend_Tool_Project_Profile $profile)
+   public static function createPropelResource(Zend_Tool_Project_Profile $profile)
    {
-//      Zend_Debug::dump(Zend_Tool_Project_Context_Repository::getInstance()->getContexts());
-//      exit();
-      $resource = $profile->createResource('directory');
-//      $profile->append($resource);
-      return self::_getPropelDirectoryResource($this->_loadedProfile);
+      $projectDirectory = $profile->search(array('projectDirectory'));
+      $resource = $projectDirectory->createResource('PropelDirectory');
+      $profile->storeToFile();
+      //TODO create folder src/propel
+      return $resource;
    }
 
    public static function _getPropelDirectoryResource(Zend_Tool_Project_Profile $profile)
    {
-      $profileSearchParams = array();
-
-      $profileSearchParams[] = 'propelDirectory';
-
+      $profileSearchParams = array('propelDirectory');
       return $profile->search($profileSearchParams);
    }
 
@@ -38,13 +35,17 @@ EOT;
    {
       $this->_loadProfile(self::NO_PROFILE_THROW_EXCEPTION);
 
-      $propelDirectoryResource = self::_getPropelDirectoryResource($this->_loadedProfile);
-
-      //TODO create folder src/propel
-      if (!$propelDirectoryResource) {
-         $this->_registry->getResponse()->appendContent('Create propel resource in project');
-         $propelDirectoryResource = $this->_createPropelResource($this->_loadedProfile);
+      if (!$propelDirectoryResource = self::_getPropelDirectoryResource($this->_loadedProfile)) {
+         try {
+            $this->_registry->getResponse()->appendContent('Try create propel resource in project');
+            $propelDirectoryResource = self::createPropelResource($this->_loadedProfile);
+         } catch (Exception $e) {
+            $this->_registry->getResponse()->appendContent('Create propel resource in project failed');
+            throw $e;
+         }
       }
+
+      exit();
       if ($propelDirectoryResource->isEnabled()) {
          throw new Zend_Tool_Project_Provider_Exception('This project already has propel enabled.');
       } else {
